@@ -200,7 +200,7 @@
                 children: widgetState.children
             });
             
-            var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/?' + params.toString();
+            var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?' + params.toString();
             
             setTimeout(function() {
                 window.location.href = bookingUrl;
