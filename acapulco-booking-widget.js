@@ -176,37 +176,42 @@
     }
     
     function setupFormSubmission() {
-        var form = document.getElementById('acapulcoBookingWidget');
-        var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
+    var form = document.getElementById('acapulcoBookingWidget');
+    var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
+    
+    if (!form || !submitBtn) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        if (!form || !submitBtn) return;
+        submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
+        submitBtn.disabled = true;
         
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
-            submitBtn.disabled = true;
-            
-            var checkinParts = widgetState.checkin.split('/');
-            var checkoutParts = widgetState.checkout.split('/');
-            var checkinFormatted = checkinParts[2] + '-' + checkinParts[0] + '-' + checkinParts[1];
-            var checkoutFormatted = checkoutParts[2] + '-' + checkoutParts[0] + '-' + checkoutParts[1];
-            
-            var params = new URLSearchParams({
-                checkin: checkinFormatted,
-                checkout: checkoutFormatted,
-                rooms: widgetState.rooms,
-                adults: widgetState.adults,
-                children: widgetState.children
-            });
-            
-            var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?' + params.toString();
-            
-            setTimeout(function() {
-                window.location.href = bookingUrl;
-            }, 600);
+        var checkinParts = widgetState.checkin.split('/');
+        var checkoutParts = widgetState.checkout.split('/');
+        var checkinFormatted = checkinParts[2] + '-' + checkinParts[0] + '-' + checkinParts[1];
+        var checkoutFormatted = checkoutParts[2] + '-' + checkoutParts[0] + '-' + checkoutParts[1];
+
+        // 👇 Updated: build params for the correct HotelRunner search link
+        var params = new URLSearchParams({
+            checkin: checkinFormatted,
+            checkout: checkoutFormatted,
+            adults: widgetState.adults,
+            children: widgetState.children,
+            childrena: 0,   // or adjust if you start handling child ages
+            infant: 0,
+            rooms: widgetState.rooms,
+            newSearch: true
         });
-    }
+
+        var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?' + params.toString();
+        
+        setTimeout(function() {
+            window.location.href = bookingUrl;
+        }, 600);
+    });
+}
+
     
     // Start initialization
     if (document.readyState === 'loading') {
