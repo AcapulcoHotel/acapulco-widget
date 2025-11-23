@@ -52,58 +52,72 @@
         return month + '/' + day + '/' + year;
     }
     
-    function setupDatePickers() {
-        var today = new Date();
-        var tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        var checkinPicker = flatpickr('#checkinInput', {
-            minDate: 'today',
-            dateFormat: 'm/d/Y',
-            defaultDate: today,
-            onChange: function(selectedDates, dateStr) {
-                widgetState.checkin = dateStr;
-                if (checkoutPicker) {
-                    var nextDay = new Date(selectedDates[0]);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    checkoutPicker.set('minDate', nextDay);
-                    if (checkoutPicker.selectedDates[0] <= selectedDates[0]) {
-                        checkoutPicker.setDate(nextDay);
-                    }
+function setupDatePickers() {
+    var today = new Date();
+    var tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    var checkinPicker = flatpickr('#checkinInput', {
+        minDate: 'today',
+        dateFormat: 'm/d/Y',
+        defaultDate: today,
+        onReady: function(selectedDates, dateStr) {
+            // Ensure widget state matches what user sees on first load
+            widgetState.checkin = dateStr;
+        },
+        onChange: function(selectedDates, dateStr) {
+            widgetState.checkin = dateStr;
+
+            if (checkoutPicker && selectedDates[0]) {
+                var nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkoutPicker.set('minDate', nextDay);
+
+                if (!checkoutPicker.selectedDates[0] || checkoutPicker.selectedDates[0] <= selectedDates[0]) {
+                    checkoutPicker.setDate(nextDay, true);
                 }
             }
-        });
-        
-        var checkoutPicker = flatpickr('#checkoutInput', {
-            minDate: tomorrow,
-            dateFormat: 'm/d/Y',
-            defaultDate: tomorrow,
-            onChange: function(selectedDates, dateStr) {
-                widgetState.checkout = dateStr;
+        }
+    });
+
+    var checkoutPicker = flatpickr('#checkoutInput', {
+        minDate: tomorrow,
+        dateFormat: 'm/d/Y',
+        defaultDate: tomorrow,
+        onReady: function(selectedDates, dateStr) {
+            widgetState.checkout = dateStr;
+        },
+        onChange: function(selectedDates, dateStr) {
+            widgetState.checkout = dateStr;
+        }
+    });
+
+    // Keep references so we can read exact dates on submit
+    widgetState._checkinPicker = checkinPicker;
+    widgetState._checkoutPicker = checkoutPicker;
+
+    var checkinField = document.querySelector('.acapulco-field-horizontal:nth-child(1)');
+    var checkoutField = document.querySelector('.acapulco-field-horizontal:nth-child(2)');
+
+    if (checkinField) {
+        checkinField.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('acapulco-date-input')) {
+                checkinPicker.open();
             }
         });
-        
-        var checkinField = document.querySelector('.acapulco-field-horizontal:nth-child(1)');
-        var checkoutField = document.querySelector('.acapulco-field-horizontal:nth-child(2)');
-        
-        if (checkinField) {
-            checkinField.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('acapulco-date-input')) {
-                    checkinPicker.open();
-                }
-            });
-            checkinField.style.cursor = 'pointer';
-        }
-        
-        if (checkoutField) {
-            checkoutField.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('acapulco-date-input')) {
-                    checkoutPicker.open();
-                }
-            });
-            checkoutField.style.cursor = 'pointer';
-        }
+        checkinField.style.cursor = 'pointer';
     }
+
+    if (checkoutField) {
+        checkoutField.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('acapulco-date-input')) {
+                checkoutPicker.open();
+            }
+        });
+        checkoutField.style.cursor = 'pointer';
+    }
+}
+
     
     function setupGuestSelector() {
         var displayBtn = document.getElementById('guestDisplayBtn');
@@ -178,63 +192,67 @@
 function setupFormSubmission() {
     var form = document.getElementById('acapulcoBookingWidget');
     var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
-    
+
     if (!form || !submitBtn) return;
-    
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
         submitBtn.disabled = true;
 
-        // Fallback in case widgetState is somehow empty
-        if (!widgetState.checkin || !widgetState.checkout) {
-            var today = new Date();
-            var tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            widgetState.checkin = formatDate(today);    // uses your existing helper
-            widgetState.checkout = formatDate(tomorrow);
+        // --- Get actual dates from flatpickr, fallback to widgetState, then to today+1 ---
+
+        var checkinDateObj, checkoutDateObj;
+
+        if (widgetState._checkinPicker && widgetState._checkinPicker.selectedDates[0]) {
+            checkinDateObj = widgetState._checkinPicker.selectedDates[0];
+        } else if (widgetState.checkin) {
+            var cParts = widgetState.checkin.split('/'); // m/d/Y
+            checkinDateObj = new Date(cParts[2], cParts[0] - 1, cParts[1]);
+        } else {
+            checkinDateObj = new Date();
         }
 
-        // widgetState.checkin / checkout are in m/d/Y (from flatpickr)
-        var checkinParts = widgetState.checkin.split('/');   // [mm, dd, yyyy]
-        var checkoutParts = widgetState.checkout.split('/'); // [mm, dd, yyyy]
-
-        function formatToYMD(parts) {
-            var m = parts[0];
-            var d = parts[1];
-            if (m.length === 1) m = '0' + m;
-            if (d.length === 1) d = '0' + d;
-            return parts[2] + '-' + m + '-' + d;
+        if (widgetState._checkoutPicker && widgetState._checkoutPicker.selectedDates[0]) {
+            checkoutDateObj = widgetState._checkoutPicker.selectedDates[0];
+        } else if (widgetState.checkout) {
+            var coParts = widgetState.checkout.split('/'); // m/d/Y
+            checkoutDateObj = new Date(coParts[2], coParts[0] - 1, coParts[1]);
+        } else {
+            checkoutDateObj = new Date(checkinDateObj);
+            checkoutDateObj.setDate(checkinDateObj.getDate() + 1);
         }
 
-        var checkinFormatted = formatToYMD(checkinParts);     // 2025-12-22
-        var checkoutFormatted = formatToYMD(checkoutParts);   // 2025-12-29
+        function formatYMD(date) {
+            var y = date.getFullYear();
+            var m = String(date.getMonth() + 1).padStart(2, '0');
+            var d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
 
-        // Calculate day_count exactly like Hotelrunner expects
-        var checkinDate = new Date(checkinFormatted + 'T00:00:00');
-        var checkoutDate = new Date(checkoutFormatted + 'T00:00:00');
+        var checkinFormatted = formatYMD(checkinDateObj);     // e.g. 2025-12-22
+        var checkoutFormatted = formatYMD(checkoutDateObj);   // e.g. 2025-12-29
+
+        // --- day_count ---
+
         var msPerDay = 24 * 60 * 60 * 1000;
-        var dayCount = Math.round((checkoutDate - checkinDate) / msPerDay);
+        var dayCount = Math.round((checkoutDateObj - checkinDateObj) / msPerDay);
         if (dayCount < 1) dayCount = 1;
+
+        // --- Guests / rooms ---
 
         var roomCount = widgetState.rooms || 1;
         var totalAdult = widgetState.adults || 1;
         var totalChild = widgetState.children || 0;
 
-        // Distribute guests across rooms in a simple, consistent way
         var roomsArr = [];
         var guestRooms = {};
-        var roomAdults = [];
-        var roomChildren = [];
-        var i;
 
-        for (i = 0; i < roomCount; i++) {
-            roomAdults.push(0);
-            roomChildren.push(0);
-        }
+        var roomAdults = new Array(roomCount).fill(0);
+        var roomChildren = new Array(roomCount).fill(0);
 
-        // First distribute adults, one by one to each room
+        // distribute adults across rooms
         var remainingAdults = totalAdult;
         var idx = 0;
         while (remainingAdults > 0 && roomCount > 0) {
@@ -243,7 +261,7 @@ function setupFormSubmission() {
             idx = (idx + 1) % roomCount;
         }
 
-        // Then distribute children
+        // distribute children across rooms
         var remainingChildren = totalChild;
         idx = 0;
         while (remainingChildren > 0 && roomCount > 0) {
@@ -252,30 +270,20 @@ function setupFormSubmission() {
             idx = (idx + 1) % roomCount;
         }
 
-        // Build rooms[] and guest_rooms{} structures
-        for (i = 0; i < roomCount; i++) {
+        for (var i = 0; i < roomCount; i++) {
             var guestCount = roomAdults[i] + roomChildren[i];
             var roomInfo = {
                 adult_count: roomAdults[i],
                 guest_count: guestCount,
                 child_count: roomChildren[i],
-                child_ages: [] // you can wire actual ages here if you collect them
+                child_ages: [] // you can populate ages here later if needed
             };
             roomsArr.push(roomInfo);
-            guestRooms[i] = roomInfo;
+            guestRooms[String(i)] = roomInfo; // keys "0", "1", ...
         }
 
-        // This matches the pattern you sent:
-        // {
-        //   "checkin_date":"2025-12-22",
-        //   "checkout_date":"2025-12-29",
-        //   "day_count":7,
-        //   "room_count":1,
-        //   "total_adult":2,
-        //   "total_child":0,
-        //   "rooms":[{...}],
-        //   "guest_rooms":{"0":{...}}
-        // }
+        // --- Build payload exactly like Hotelrunner uses ---
+
         var searchPayload = {
             checkin_date: checkinFormatted,
             checkout_date: checkoutFormatted,
@@ -287,18 +295,17 @@ function setupFormSubmission() {
             guest_rooms: guestRooms
         };
 
-        // Encode ONCE, like Hotelrunner’s URL:
-        // ?search=%7B%22checkin_date%22:%222025-12-22%22,...
-        var searchParam = encodeURIComponent(JSON.stringify(searchPayload));
+        // IMPORTANT: use encodeURI, not encodeURIComponent, to match their style
+        var searchParam = encodeURI(JSON.stringify(searchPayload));
 
         var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?search=' + searchParam;
 
-        // Handy for debugging: uncomment this to inspect in DevTools
-        // console.log('Booking URL:', bookingUrl, searchPayload);
+        // Uncomment for debugging:
+        // console.log('Booking URL:', bookingUrl);
+        // console.log('Search payload:', searchPayload);
 
         setTimeout(function() {
             window.location.href = bookingUrl;
         }, 600);
     });
 }
-
