@@ -175,93 +175,130 @@
         displayText.textContent = text;
     }
     
-    // 🔧 THIS IS THE IMPORTANT PART: build HotelRunner-style `search` param
-    function setupFormSubmission() {
-        var form = document.getElementById('acapulcoBookingWidget');
-        var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
-        
-        if (!form || !submitBtn) return;
-        
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
-            submitBtn.disabled = true;
-            
-            // widgetState.checkin / checkout are in "MM/DD/YYYY" format
-            var checkinParts = widgetState.checkin.split('/');
-            var checkoutParts = widgetState.checkout.split('/');
-            
-            // Convert to "YYYY-MM-DD"
-            var checkinFormatted = checkinParts[2] + '-' +
-                                   checkinParts[0].padStart(2, '0') + '-' +
-                                   checkinParts[1].padStart(2, '0');
-            var checkoutFormatted = checkoutParts[2] + '-' +
-                                    checkoutParts[0].padStart(2, '0') + '-' +
-                                    checkoutParts[1].padStart(2, '0');
-            
-            // Calculate day_count
-            var checkinDateObj = new Date(checkinParts[2], parseInt(checkinParts[0], 10) - 1, parseInt(checkinParts[1], 10));
-            var checkoutDateObj = new Date(checkoutParts[2], parseInt(checkoutParts[0], 10) - 1, parseInt(checkoutParts[1], 10));
-            var diffMs = checkoutDateObj.getTime() - checkinDateObj.getTime();
-            var dayCount = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
-            
-            // Distribute adults/children across rooms
-            var roomCount = widgetState.rooms;
-            var totalAdults = widgetState.adults;
-            var totalChildren = widgetState.children;
-            
-            var adultsPerRoomBase = Math.floor(totalAdults / roomCount);
-            var extraAdults = totalAdults % roomCount;
-            
-            var childrenPerRoomBase = Math.floor(totalChildren / roomCount);
-            var extraChildren = totalChildren % roomCount;
-            
-            var roomsArray = [];
-            var guestRoomsObj = {};
-            
-            for (var i = 0; i < roomCount; i++) {
-                var adultsInRoom = adultsPerRoomBase + (i < extraAdults ? 1 : 0);
-                var childrenInRoom = childrenPerRoomBase + (i < extraChildren ? 1 : 0);
-                var guestCount = adultsInRoom + childrenInRoom;
-                
-                var roomObj = {
-                    adult_count: adultsInRoom,
-                    guest_count: guestCount,
-                    child_count: childrenInRoom,
-                    child_ages: [] // we don't collect ages in the widget, so leave empty
-                };
-                
-                roomsArray.push(roomObj);
-                guestRoomsObj[String(i)] = roomObj;
-            }
-            
-            // Build HotelRunner `search` payload
-            var searchPayload = {
-                checkin_date: checkinFormatted,
-                checkout_date: checkoutFormatted,
-                day_count: dayCount,
-                room_count: roomCount,
-                total_adult: totalAdults,
-                total_child: totalChildren,
-                rooms: roomsArray,
-                guest_rooms: guestRoomsObj
-            };
-            
-            // Encode as ?search=<urlencoded JSON>
-            var searchParam = encodeURIComponent(JSON.stringify(searchPayload));
-            var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?search=' + searchParam;
-            
-            setTimeout(function() {
-                window.location.href = bookingUrl;
-            }, 600);
-        });
-    }
+function setupFormSubmission() {
+    var form = document.getElementById('acapulcoBookingWidget');
+    var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
     
-    // Start initialization
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeWidget);
-    } else {
-        initializeWidget();
-    }
-})();
+    if (!form || !submitBtn) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
+        submitBtn.disabled = true;
+
+        // Fallback in case widgetState is somehow empty
+        if (!widgetState.checkin || !widgetState.checkout) {
+            var today = new Date();
+            var tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            widgetState.checkin = formatDate(today);    // uses your existing helper
+            widgetState.checkout = formatDate(tomorrow);
+        }
+
+        // widgetState.checkin / checkout are in m/d/Y (from flatpickr)
+        var checkinParts = widgetState.checkin.split('/');   // [mm, dd, yyyy]
+        var checkoutParts = widgetState.checkout.split('/'); // [mm, dd, yyyy]
+
+        function formatToYMD(parts) {
+            var m = parts[0];
+            var d = parts[1];
+            if (m.length === 1) m = '0' + m;
+            if (d.length === 1) d = '0' + d;
+            return parts[2] + '-' + m + '-' + d;
+        }
+
+        var checkinFormatted = formatToYMD(checkinParts);     // 2025-12-22
+        var checkoutFormatted = formatToYMD(checkoutParts);   // 2025-12-29
+
+        // Calculate day_count exactly like Hotelrunner expects
+        var checkinDate = new Date(checkinFormatted + 'T00:00:00');
+        var checkoutDate = new Date(checkoutFormatted + 'T00:00:00');
+        var msPerDay = 24 * 60 * 60 * 1000;
+        var dayCount = Math.round((checkoutDate - checkinDate) / msPerDay);
+        if (dayCount < 1) dayCount = 1;
+
+        var roomCount = widgetState.rooms || 1;
+        var totalAdult = widgetState.adults || 1;
+        var totalChild = widgetState.children || 0;
+
+        // Distribute guests across rooms in a simple, consistent way
+        var roomsArr = [];
+        var guestRooms = {};
+        var roomAdults = [];
+        var roomChildren = [];
+        var i;
+
+        for (i = 0; i < roomCount; i++) {
+            roomAdults.push(0);
+            roomChildren.push(0);
+        }
+
+        // First distribute adults, one by one to each room
+        var remainingAdults = totalAdult;
+        var idx = 0;
+        while (remainingAdults > 0 && roomCount > 0) {
+            roomAdults[idx]++;
+            remainingAdults--;
+            idx = (idx + 1) % roomCount;
+        }
+
+        // Then distribute children
+        var remainingChildren = totalChild;
+        idx = 0;
+        while (remainingChildren > 0 && roomCount > 0) {
+            roomChildren[idx]++;
+            remainingChildren--;
+            idx = (idx + 1) % roomCount;
+        }
+
+        // Build rooms[] and guest_rooms{} structures
+        for (i = 0; i < roomCount; i++) {
+            var guestCount = roomAdults[i] + roomChildren[i];
+            var roomInfo = {
+                adult_count: roomAdults[i],
+                guest_count: guestCount,
+                child_count: roomChildren[i],
+                child_ages: [] // you can wire actual ages here if you collect them
+            };
+            roomsArr.push(roomInfo);
+            guestRooms[i] = roomInfo;
+        }
+
+        // This matches the pattern you sent:
+        // {
+        //   "checkin_date":"2025-12-22",
+        //   "checkout_date":"2025-12-29",
+        //   "day_count":7,
+        //   "room_count":1,
+        //   "total_adult":2,
+        //   "total_child":0,
+        //   "rooms":[{...}],
+        //   "guest_rooms":{"0":{...}}
+        // }
+        var searchPayload = {
+            checkin_date: checkinFormatted,
+            checkout_date: checkoutFormatted,
+            day_count: dayCount,
+            room_count: roomCount,
+            total_adult: totalAdult,
+            total_child: totalChild,
+            rooms: roomsArr,
+            guest_rooms: guestRooms
+        };
+
+        // Encode ONCE, like Hotelrunner’s URL:
+        // ?search=%7B%22checkin_date%22:%222025-12-22%22,...
+        var searchParam = encodeURIComponent(JSON.stringify(searchPayload));
+
+        var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?search=' + searchParam;
+
+        // Handy for debugging: uncomment this to inspect in DevTools
+        // console.log('Booking URL:', bookingUrl, searchPayload);
+
+        setTimeout(function() {
+            window.location.href = bookingUrl;
+        }, 600);
+    });
+}
+
