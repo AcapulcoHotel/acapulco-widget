@@ -309,3 +309,4 @@ function setupFormSubmission() {
         }, 600);
     });
 }
+})();
