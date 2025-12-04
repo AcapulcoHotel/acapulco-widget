@@ -298,7 +298,7 @@ function setupFormSubmission() {
         // IMPORTANT: use encodeURI, not encodeURIComponent, to match their style
         var searchParam = encodeURI(JSON.stringify(searchPayload));
 
-        var bookingUrl = 'https://acapulco-resort-convention-spa.hotelrunner.com/bv3/search?search=' + searchParam;
+        var bookingUrl = 'https://reservation.acapulco.com.tr/bv3/search' + searchParam;
 
         // Uncomment for debugging:
         // console.log('Booking URL:', bookingUrl);
