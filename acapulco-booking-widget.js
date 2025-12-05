@@ -309,4 +309,5 @@ function setupFormSubmission() {
         }, 600);
     });
 }
+    window.initializeWidget = initializeWidget;
 })();
