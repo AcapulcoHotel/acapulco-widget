@@ -298,7 +298,12 @@ function setupFormSubmission() {
         // IMPORTANT: use encodeURI, not encodeURIComponent, to match their style
         var searchParam = encodeURI(JSON.stringify(searchPayload));
 
-        var bookingUrl = 'https://reservation.acapulco.com.tr/bv3/search' + searchParam;
+        var encoded = encodeURIComponent(JSON.stringify(searchPayload));
+var bookingUrl = 
+    'https://reservation.acapulco.com.tr/bv3/search?search=' 
+    + encoded 
+    + '&locale=en-US&currency=EUR';
+
 
         // Uncomment for debugging:
         // console.log('Booking URL:', bookingUrl);
@@ -310,4 +315,14 @@ function setupFormSubmission() {
     });
 }
     window.initializeWidget = initializeWidget;
+
+    window.addEventListener("pageshow", function(event) {
+    if (event.persisted) {
+        var btn = document.querySelector(".acapulco-book-now-btn");
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Book Now';
+        }
+    }
+});
 })();
