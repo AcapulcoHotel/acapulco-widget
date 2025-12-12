@@ -487,23 +487,39 @@
             
             var encoded = encodeURIComponent(JSON.stringify(searchPayload));
             
-            // Get locale from current language
             var localeMap = {
-                en: 'en-US',
-                tr: 'tr-TR',
-                de: 'de-DE',
-                ru: 'ru-RU'
+              en: 'en',
+              tr: 'tr',
+              de: 'de',
+              ru: 'ru'
             };
-            var locale = localeMap[currentLang] || 'en-US';
+
+            var container = document.getElementById('acapulco_booking_widget');
+            var forcedLocale = container && container.getAttribute('data-locale');
+
+            var locale = forcedLocale || localeMap[currentLang] || 'en';
+
+            var bookingUrl =
+              'https://reservation.acapulco.com.tr/bv3/search?search=' +
+              encoded +
+              '&locale=' + encodeURIComponent(locale) +
+              '&currency=EUR' +
+              '&lang=' + encodeURIComponent(currentLang);
             
-            var bookingUrl = 'https://reservation.acapulco.com.tr/bv3/search?search=' + 
-                           encoded + 
-                           '&locale=' + locale + 
-                           '&currency=EUR';
-            
-            setTimeout(function() {
-                window.location.href = bookingUrl;
-            }, 600);
+            var w = window.open('', '_blank');
+
+            if (w) {
+              try { w.opener = null; } catch (err) {}
+
+              w.location.href = bookingUrl;
+
+              setTimeout(function () {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = t.bookNow;
+              }, 600);
+            } else {
+              window.location.href = bookingUrl;
+            }
         });
     }
     
