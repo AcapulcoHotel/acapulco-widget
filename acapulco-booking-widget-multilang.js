@@ -488,7 +488,7 @@
             var encoded = encodeURIComponent(JSON.stringify(searchPayload));
             
             var localeMap = {
-              en: 'en',
+              en: 'en-US',
               tr: 'tr',
               de: 'de',
               ru: 'ru'
@@ -497,7 +497,7 @@
             var container = document.getElementById('acapulco_booking_widget');
             var forcedLocale = container && container.getAttribute('data-locale');
 
-            var locale = forcedLocale || localeMap[currentLang] || 'en';
+            var locale = forcedLocale || localeMap[currentLang] || 'en-US';
 
             var bookingUrl =
               'https://reservation.acapulco.com.tr/bv3/search?search=' +
