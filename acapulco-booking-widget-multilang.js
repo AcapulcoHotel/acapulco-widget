@@ -500,7 +500,7 @@
             var localeMap = {
               en: 'en-US',
               tr: 'tr',
-              de: 'de',
+              de: 'de-DE',
               ru: 'ru'
             };
 
