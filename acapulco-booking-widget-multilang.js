@@ -190,9 +190,19 @@
     // ============================================
     function initializeWidget() {
         if (typeof flatpickr === 'undefined') {
-            console.error('Acapulco Widget: Flatpickr library not loaded');
-            return;
-        }
+  var tries = 0;
+  var timer = setInterval(function () {
+    if (typeof flatpickr !== 'undefined') {
+      clearInterval(timer);
+      initializeWidget();
+    } else if (++tries > 50) {
+      clearInterval(timer);
+      console.error('Acapulco Widget: Flatpickr library not loaded (timeout)');
+    }
+  }, 100);
+  return;
+}
+
         
         loadFlatpickrLocale(function() {
             setupDatePickers();
