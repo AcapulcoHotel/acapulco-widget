@@ -1,6 +1,5 @@
 /* ACAPULCO BOOKING WIDGET - EXTERNAL JS */
-/* Host this file on your server or CDN */
-/* Version 1.0.0 */
+/* Version 1.1.0 - Working with all click events */
 
 (function() {
     'use strict';
@@ -8,7 +7,7 @@
     // Inject widget HTML
     var container = document.getElementById('acapulco_booking_widget');
     if (!container) {
-        console.error('Acapulco Widget: Container element #acapulco_booking_widget not found');
+        console.error('Acapulco Widget: Container #acapulco_booking_widget not found');
         return;
     }
     
@@ -23,11 +22,20 @@
         children: 0
     };
     
-    // Initialize
+    // Initialize widget
     function initializeWidget() {
-        // Check if flatpickr is loaded
         if (typeof flatpickr === 'undefined') {
-            console.error('Acapulco Widget: Flatpickr library not loaded. Please include: https://cdn.jsdelivr.net/npm/flatpickr');
+            console.error('Acapulco Widget: Flatpickr not loaded');
+            // Retry after 500ms
+            setTimeout(function() {
+                if (typeof flatpickr !== 'undefined') {
+                    console.log('Flatpickr loaded, initializing...');
+                    setupDatePickers();
+                    setupGuestSelector();
+                    setupFormSubmission();
+                    setDefaultDates();
+                }
+            }, 500);
             return;
         }
         
@@ -35,6 +43,7 @@
         setupGuestSelector();
         setupFormSubmission();
         setDefaultDates();
+        console.log('Widget initialized successfully');
     }
     
     function setDefaultDates() {
@@ -52,86 +61,88 @@
         return month + '/' + day + '/' + year;
     }
     
-function setupDatePickers() {
-    var today = new Date();
-    var tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    function setupDatePickers() {
+        var today = new Date();
+        var tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-    var checkinPicker = flatpickr('#checkinInput', {
-        minDate: 'today',
-        dateFormat: 'm/d/Y',
-        defaultDate: today,
-        onReady: function(selectedDates, dateStr) {
-            // Ensure widget state matches what user sees on first load
-            widgetState.checkin = dateStr;
-        },
-        onChange: function(selectedDates, dateStr) {
-            widgetState.checkin = dateStr;
-
-            if (checkoutPicker && selectedDates[0]) {
-                var nextDay = new Date(selectedDates[0]);
-                nextDay.setDate(nextDay.getDate() + 1);
-                checkoutPicker.set('minDate', nextDay);
-
-                if (!checkoutPicker.selectedDates[0] || checkoutPicker.selectedDates[0] <= selectedDates[0]) {
-                    checkoutPicker.setDate(nextDay, true);
+        var checkinPicker = flatpickr('#checkinInput', {
+            minDate: 'today',
+            dateFormat: 'm/d/Y',
+            defaultDate: today,
+            onReady: function(selectedDates, dateStr) {
+                widgetState.checkin = dateStr;
+            },
+            onChange: function(selectedDates, dateStr) {
+                widgetState.checkin = dateStr;
+                if (checkoutPicker && selectedDates[0]) {
+                    var nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkoutPicker.set('minDate', nextDay);
+                    if (!checkoutPicker.selectedDates[0] || checkoutPicker.selectedDates[0] <= selectedDates[0]) {
+                        checkoutPicker.setDate(nextDay, true);
+                    }
                 }
             }
-        }
-    });
+        });
 
-    var checkoutPicker = flatpickr('#checkoutInput', {
-        minDate: tomorrow,
-        dateFormat: 'm/d/Y',
-        defaultDate: tomorrow,
-        onReady: function(selectedDates, dateStr) {
-            widgetState.checkout = dateStr;
-        },
-        onChange: function(selectedDates, dateStr) {
-            widgetState.checkout = dateStr;
-        }
-    });
+        var checkoutPicker = flatpickr('#checkoutInput', {
+            minDate: tomorrow,
+            dateFormat: 'm/d/Y',
+            defaultDate: tomorrow,
+            onReady: function(selectedDates, dateStr) {
+                widgetState.checkout = dateStr;
+            },
+            onChange: function(selectedDates, dateStr) {
+                widgetState.checkout = dateStr;
+            }
+        });
 
-    // Keep references so we can read exact dates on submit
-    widgetState._checkinPicker = checkinPicker;
-    widgetState._checkoutPicker = checkoutPicker;
+        widgetState._checkinPicker = checkinPicker;
+        widgetState._checkoutPicker = checkoutPicker;
 
-    var checkinField = document.querySelector('.acapulco-field-horizontal:nth-child(1)');
-    var checkoutField = document.querySelector('.acapulco-field-horizontal:nth-child(2)');
+        // Make entire field clickable
+        var checkinField = document.querySelector('.acapulco-field-horizontal:nth-child(1)');
+        var checkoutField = document.querySelector('.acapulco-field-horizontal:nth-child(2)');
 
-    if (checkinField) {
-        checkinField.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('acapulco-date-input')) {
+        if (checkinField) {
+            checkinField.addEventListener('click', function(e) {
+                e.preventDefault();
                 checkinPicker.open();
-            }
-        });
-        checkinField.style.cursor = 'pointer';
-    }
+            });
+        }
 
-    if (checkoutField) {
-        checkoutField.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('acapulco-date-input')) {
+        if (checkoutField) {
+            checkoutField.addEventListener('click', function(e) {
+                e.preventDefault();
                 checkoutPicker.open();
-            }
-        });
-        checkoutField.style.cursor = 'pointer';
+            });
+        }
+        
+        console.log('Date pickers initialized');
     }
-}
-
     
     function setupGuestSelector() {
         var displayBtn = document.getElementById('guestDisplayBtn');
         var dropdown = document.getElementById('guestDropdownPanel');
+        var guestField = document.querySelector('.acapulco-guest-selector');
         
-        if (!displayBtn || !dropdown) return;
+        if (!displayBtn || !dropdown) {
+            console.error('Guest selector elements not found');
+            return;
+        }
         
-        displayBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
+        // Make entire guest field clickable
+        if (guestField) {
+            guestField.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+        }
         
+        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
-            if (!dropdown.contains(e.target) && !displayBtn.contains(e.target)) {
+            if (!guestField.contains(e.target)) {
                 dropdown.classList.remove('active');
             }
         });
@@ -139,6 +150,8 @@ function setupDatePickers() {
         setupCounter('room', 1, 10);
         setupCounter('adult', 1, 20);
         setupCounter('child', 0, 10);
+        
+        console.log('Guest selector initialized');
     }
     
     function setupCounter(type, min, max) {
@@ -152,6 +165,7 @@ function setupDatePickers() {
         
         decrementBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             if (widgetState[propName] > min) {
                 widgetState[propName]--;
                 valueDisplay.textContent = widgetState[propName];
@@ -162,6 +176,7 @@ function setupDatePickers() {
         
         incrementBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             if (widgetState[propName] < max) {
                 widgetState[propName]++;
                 valueDisplay.textContent = widgetState[propName];
@@ -189,140 +204,129 @@ function setupDatePickers() {
         displayText.textContent = text;
     }
     
-function setupFormSubmission() {
-    var form = document.getElementById('acapulcoBookingWidget');
-    var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
+    function setupFormSubmission() {
+        var form = document.getElementById('acapulcoBookingWidget');
+        var submitBtn = form ? form.querySelector('.acapulco-book-now-btn') : null;
 
-    if (!form || !submitBtn) return;
+        if (!form || !submitBtn) return;
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
-        submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Loading...<span class="acapulco-loading"></span>';
+            submitBtn.disabled = true;
 
-        // --- Get actual dates from flatpickr, fallback to widgetState, then to today+1 ---
+            var checkinDateObj, checkoutDateObj;
 
-        var checkinDateObj, checkoutDateObj;
+            if (widgetState._checkinPicker && widgetState._checkinPicker.selectedDates[0]) {
+                checkinDateObj = widgetState._checkinPicker.selectedDates[0];
+            } else if (widgetState.checkin) {
+                var cParts = widgetState.checkin.split('/');
+                checkinDateObj = new Date(cParts[2], cParts[0] - 1, cParts[1]);
+            } else {
+                checkinDateObj = new Date();
+            }
 
-        if (widgetState._checkinPicker && widgetState._checkinPicker.selectedDates[0]) {
-            checkinDateObj = widgetState._checkinPicker.selectedDates[0];
-        } else if (widgetState.checkin) {
-            var cParts = widgetState.checkin.split('/'); // m/d/Y
-            checkinDateObj = new Date(cParts[2], cParts[0] - 1, cParts[1]);
-        } else {
-            checkinDateObj = new Date();
-        }
+            if (widgetState._checkoutPicker && widgetState._checkoutPicker.selectedDates[0]) {
+                checkoutDateObj = widgetState._checkoutPicker.selectedDates[0];
+            } else if (widgetState.checkout) {
+                var coParts = widgetState.checkout.split('/');
+                checkoutDateObj = new Date(coParts[2], coParts[0] - 1, coParts[1]);
+            } else {
+                checkoutDateObj = new Date(checkinDateObj);
+                checkoutDateObj.setDate(checkinDateObj.getDate() + 1);
+            }
 
-        if (widgetState._checkoutPicker && widgetState._checkoutPicker.selectedDates[0]) {
-            checkoutDateObj = widgetState._checkoutPicker.selectedDates[0];
-        } else if (widgetState.checkout) {
-            var coParts = widgetState.checkout.split('/'); // m/d/Y
-            checkoutDateObj = new Date(coParts[2], coParts[0] - 1, coParts[1]);
-        } else {
-            checkoutDateObj = new Date(checkinDateObj);
-            checkoutDateObj.setDate(checkinDateObj.getDate() + 1);
-        }
+            function formatYMD(date) {
+                var y = date.getFullYear();
+                var m = String(date.getMonth() + 1).padStart(2, '0');
+                var d = String(date.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + d;
+            }
 
-        function formatYMD(date) {
-            var y = date.getFullYear();
-            var m = String(date.getMonth() + 1).padStart(2, '0');
-            var d = String(date.getDate()).padStart(2, '0');
-            return y + '-' + m + '-' + d;
-        }
+            var checkinFormatted = formatYMD(checkinDateObj);
+            var checkoutFormatted = formatYMD(checkoutDateObj);
 
-        var checkinFormatted = formatYMD(checkinDateObj);     // e.g. 2025-12-22
-        var checkoutFormatted = formatYMD(checkoutDateObj);   // e.g. 2025-12-29
+            var msPerDay = 24 * 60 * 60 * 1000;
+            var dayCount = Math.round((checkoutDateObj - checkinDateObj) / msPerDay);
+            if (dayCount < 1) dayCount = 1;
 
-        // --- day_count ---
+            var roomCount = widgetState.rooms || 1;
+            var totalAdult = widgetState.adults || 1;
+            var totalChild = widgetState.children || 0;
 
-        var msPerDay = 24 * 60 * 60 * 1000;
-        var dayCount = Math.round((checkoutDateObj - checkinDateObj) / msPerDay);
-        if (dayCount < 1) dayCount = 1;
+            var roomsArr = [];
+            var guestRooms = {};
+            var roomAdults = new Array(roomCount).fill(0);
+            var roomChildren = new Array(roomCount).fill(0);
 
-        // --- Guests / rooms ---
+            var remainingAdults = totalAdult;
+            var idx = 0;
+            while (remainingAdults > 0 && roomCount > 0) {
+                roomAdults[idx]++;
+                remainingAdults--;
+                idx = (idx + 1) % roomCount;
+            }
 
-        var roomCount = widgetState.rooms || 1;
-        var totalAdult = widgetState.adults || 1;
-        var totalChild = widgetState.children || 0;
+            var remainingChildren = totalChild;
+            idx = 0;
+            while (remainingChildren > 0 && roomCount > 0) {
+                roomChildren[idx]++;
+                remainingChildren--;
+                idx = (idx + 1) % roomCount;
+            }
 
-        var roomsArr = [];
-        var guestRooms = {};
+            for (var i = 0; i < roomCount; i++) {
+                var guestCount = roomAdults[i] + roomChildren[i];
+                var roomInfo = {
+                    adult_count: roomAdults[i],
+                    guest_count: guestCount,
+                    child_count: roomChildren[i],
+                    child_ages: []
+                };
+                roomsArr.push(roomInfo);
+                guestRooms[String(i)] = roomInfo;
+            }
 
-        var roomAdults = new Array(roomCount).fill(0);
-        var roomChildren = new Array(roomCount).fill(0);
-
-        // distribute adults across rooms
-        var remainingAdults = totalAdult;
-        var idx = 0;
-        while (remainingAdults > 0 && roomCount > 0) {
-            roomAdults[idx]++;
-            remainingAdults--;
-            idx = (idx + 1) % roomCount;
-        }
-
-        // distribute children across rooms
-        var remainingChildren = totalChild;
-        idx = 0;
-        while (remainingChildren > 0 && roomCount > 0) {
-            roomChildren[idx]++;
-            remainingChildren--;
-            idx = (idx + 1) % roomCount;
-        }
-
-        for (var i = 0; i < roomCount; i++) {
-            var guestCount = roomAdults[i] + roomChildren[i];
-            var roomInfo = {
-                adult_count: roomAdults[i],
-                guest_count: guestCount,
-                child_count: roomChildren[i],
-                child_ages: [] // you can populate ages here later if needed
+            var searchPayload = {
+                checkin_date: checkinFormatted,
+                checkout_date: checkoutFormatted,
+                day_count: dayCount,
+                room_count: roomCount,
+                total_adult: totalAdult,
+                total_child: totalChild,
+                rooms: roomsArr,
+                guest_rooms: guestRooms
             };
-            roomsArr.push(roomInfo);
-            guestRooms[String(i)] = roomInfo; // keys "0", "1", ...
-        }
 
-        // --- Build payload exactly like Hotelrunner uses ---
+            var encoded = encodeURIComponent(JSON.stringify(searchPayload));
+            var bookingUrl = 'https://reservation.acapulco.com.tr/bv3/search?search=' + 
+                           encoded + 
+                           '&locale=en-US&currency=EUR';
 
-        var searchPayload = {
-            checkin_date: checkinFormatted,
-            checkout_date: checkoutFormatted,
-            day_count: dayCount,
-            room_count: roomCount,
-            total_adult: totalAdult,
-            total_child: totalChild,
-            rooms: roomsArr,
-            guest_rooms: guestRooms
-        };
-
-        // IMPORTANT: use encodeURI, not encodeURIComponent, to match their style
-        var searchParam = encodeURI(JSON.stringify(searchPayload));
-
-        var encoded = encodeURIComponent(JSON.stringify(searchPayload));
-var bookingUrl = 
-    'https://reservation.acapulco.com.tr/bv3/search?search=' 
-    + encoded 
-    + '&locale=en-US&currency=EUR';
-
-
-        // Uncomment for debugging:
-        // console.log('Booking URL:', bookingUrl);
-        // console.log('Search payload:', searchPayload);
-
-        setTimeout(function() {
-            window.location.href = bookingUrl;
-        }, 600);
-    });
-}
-    window.initializeWidget = initializeWidget;
-
-    window.addEventListener("pageshow", function(event) {
-    if (event.persisted) {
-        var btn = document.querySelector(".acapulco-book-now-btn");
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = 'Book Now';
-        }
+            setTimeout(function() {
+                window.location.href = bookingUrl;
+            }, 600);
+        });
+        
+        console.log('Form submission initialized');
     }
-});
+    
+    // Page show event (for back button)
+    window.addEventListener("pageshow", function(event) {
+        if (event.persisted) {
+            var btn = document.querySelector(".acapulco-book-now-btn");
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Book Now';
+            }
+        }
+    });
+    
+    // Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeWidget);
+    } else {
+        initializeWidget();
+    }
 })();
