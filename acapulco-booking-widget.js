@@ -1,5 +1,5 @@
 /* ACAPULCO BOOKING WIDGET - EXTERNAL JS */
-/* Version 1.1.0 - Working with all click events */
+/* Version 1.1.0 -  */
 
 (function() {
     'use strict';
