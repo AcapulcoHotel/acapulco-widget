@@ -1,18 +1,16 @@
 /* ACAPULCO BOOKING WIDGET - EXTERNAL CSS */
-/* Expedia Style - Narrow width, Blue button, Larger fonts */
-/* Version 2.0.0 */
+/* Version 2.0.0 - Expedia Style + Child Age Selection */
 
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
 
-/* MAIN WIDGET CONTAINER - Narrow width */
 .acapulco-widget-horizontal{
     font-family:'Open Sans',sans-serif;
     background:#fff;
     border-radius:8px;
     box-shadow:0 4px 20px rgba(35,66,130,.15);
     padding:20px 25px;
-    max-width:950px;  /* dar genişlik */
+    max-width:950px;
     width:95%;
     margin:20px auto;
     position:relative;
@@ -22,18 +20,14 @@
 .acapulco-widget-horizontal::before{
     content:'';
     position:absolute;
-    top:0;
-    left:0;
-    right:0;
+    top:0;left:0;right:0;
     height:3px;
     background:linear-gradient(90deg,#0066FF 0%,#0052CC 100%);
     opacity:0;
     animation:slideInTop .6s ease-out .2s forwards;
 }
 
-@keyframes slideInTop{
-    to{opacity:1}
-}
+@keyframes slideInTop{to{opacity:1}}
 
 .acapulco-form-horizontal{
     display:flex;
@@ -51,21 +45,14 @@
     cursor:pointer;
     transition:all .3s ease;
     min-width:0;
-    max-width:none;
 }
 
-.acapulco-field-horizontal:last-of-type{
-    border-right:none;
-}
+.acapulco-field-horizontal:last-of-type{border-right:none}
+.acapulco-field-horizontal:hover{background-color:#f8f9fb}
 
-.acapulco-field-horizontal:hover{
-    background-color:#f8f9fb;
-}
-
-/* LABEL - Büyütülmüş fontlar */
 .acapulco-field-label{
     display:block;
-    font-size:13px;  /* 11px'ten büyütüldü */
+    font-size:13px;
     font-weight:600;
     color:#2c2c2c;
     margin-bottom:5px;
@@ -73,20 +60,19 @@
     text-transform:uppercase;
 }
 
-/* CONTENT - Büyütülmüş fontlar */
 .acapulco-field-content{
     display:flex;
     align-items:center;
     gap:8px;
-    font-size:15px;  /* 14px'ten büyütüldü */
+    font-size:15px;
     color:#4a4a4a;
     font-weight:500;
 }
 
 .acapulco-field-icon{
-    width:20px;  /* 18px'ten büyütüldü */
+    width:20px;
     height:20px;
-    color:#0066FF;  /* Mavi renk */
+    color:#0066FF;
     flex-shrink:0;
 }
 
@@ -103,21 +89,20 @@
     padding:0 0 0 15px;
 }
 
-/* BLUE BUTTON -  */
 .acapulco-book-now-btn{
-    background:linear-gradient(135deg,#0066FF 0%,#0052CC 100%);  /* Mavi gradient */
+    background:linear-gradient(135deg,#0066FF 0%,#0052CC 100%);
     color:#fff!important;
     border:none;
     padding:14px 35px;
-    font-size:15px;  /* 14px'ten büyütüldü */
+    font-size:15px;
     font-weight:700;
     font-family:'Open Sans',sans-serif;
-    border-radius:25px;  /* Daha yuvarlak */
+    border-radius:25px;
     cursor:pointer;
     transition:all .3s ease;
     text-transform:uppercase;
     letter-spacing:1px;
-    box-shadow:0 4px 15px rgba(0,102,255,.25);  /* Mavi gölge */
+    box-shadow:0 4px 15px rgba(0,102,255,.25);
     position:relative;
     overflow:hidden;
     white-space:nowrap;
@@ -126,17 +111,13 @@
 .acapulco-book-now-btn::before{
     content:'';
     position:absolute;
-    top:0;
-    left:-100%;
-    width:100%;
-    height:100%;
+    top:0;left:-100%;
+    width:100%;height:100%;
     background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
     transition:left .5s ease;
 }
 
-.acapulco-book-now-btn:hover::before{
-    left:100%;
-}
+.acapulco-book-now-btn:hover::before{left:100%}
 
 .acapulco-book-now-btn:hover{
     background:linear-gradient(135deg,#0052CC 0%,#003D99 100%);
@@ -144,15 +125,13 @@
     transform:translateY(-2px);
 }
 
-.acapulco-book-now-btn:active{
-    transform:translateY(0);
-}
+.acapulco-book-now-btn:active{transform:translateY(0)}
 
 .acapulco-date-input{
     border:none!important;
     background:transparent!important;
     font-family:'Open Sans',sans-serif!important;
-    font-size:15px!important;  /* 14px'ten büyütüldü */
+    font-size:15px!important;
     color:#4a4a4a!important;
     cursor:pointer!important;
     padding:0!important;
@@ -162,18 +141,10 @@
     font-weight:500;
 }
 
-.acapulco-date-input:focus{
-    outline:none!important;
-}
+.acapulco-date-input:focus{outline:none!important}
 
-.acapulco-guest-selector{
-    position:relative;
-}
-
-.acapulco-guest-display{
-    cursor:pointer;
-    user-select:none;
-}
+.acapulco-guest-selector{position:relative}
+.acapulco-guest-display{cursor:pointer;user-select:none}
 
 .acapulco-guest-dropdown{
     position:absolute;
@@ -184,11 +155,14 @@
     border-radius:8px;
     box-shadow:0 10px 40px rgba(0,0,0,.15);
     padding:20px;
-    min-width:300px;
+    min-width:340px;
+    max-height:420px;
+    overflow-y:auto;
     z-index:1000;
     opacity:0;
     visibility:hidden;
-    transition:all .3s ease;
+    transition:opacity .3s ease,visibility .3s ease,transform .3s ease;
+    cursor:default;
 }
 
 .acapulco-guest-dropdown.active{
@@ -200,11 +174,9 @@
 .acapulco-guest-dropdown::before{
     content:'';
     position:absolute;
-    top:-8px;
-    left:50%;
+    top:-8px;left:50%;
     transform:translateX(-50%);
-    width:0;
-    height:0;
+    width:0;height:0;
     border-left:8px solid transparent;
     border-right:8px solid transparent;
     border-bottom:8px solid #fff;
@@ -219,9 +191,7 @@
     border-bottom:1px solid #f0f0f0;
 }
 
-.acapulco-guest-row:last-child{
-    border-bottom:none;
-}
+.acapulco-guest-row:last-child{border-bottom:none}
 
 .acapulco-guest-label{
     font-size:14px;
@@ -236,12 +206,11 @@
 }
 
 .acapulco-guest-btn{
-    width:30px;
-    height:30px;
+    width:30px;height:30px;
     border-radius:50%;
-    border:2px solid #0066FF;  /* Mavi border */
+    border:2px solid #0066FF;
     background:#fff;
-    color:#0066FF;  /* Mavi text */
+    color:#0066FF;
     font-size:16px;
     font-weight:700;
     cursor:pointer;
@@ -252,21 +221,9 @@
     line-height:1;
 }
 
-.acapulco-guest-btn:hover{
-    background:#0066FF;
-    color:#fff;
-    transform:scale(1.05);
-}
-
-.acapulco-guest-btn:active{
-    transform:scale(.95);
-}
-
-.acapulco-guest-btn:disabled{
-    opacity:.3;
-    cursor:not-allowed;
-    transform:none;
-}
+.acapulco-guest-btn:hover{background:#0066FF;color:#fff;transform:scale(1.05)}
+.acapulco-guest-btn:active{transform:scale(.95)}
+.acapulco-guest-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
 
 .acapulco-guest-count{
     font-size:15px;
@@ -281,13 +238,94 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    max-width:140px;
+    max-width:160px;
 }
 
+/* ===== CHILD AGE SELECTION ===== */
+.acapulco-child-ages{
+    margin-top:4px;
+}
+
+.acapulco-age-row{
+    padding:10px 0;
+    border-bottom:1px solid #f0f0f0;
+}
+
+.acapulco-age-select{
+    font-family:'Open Sans',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:#2c2c2c;
+    background:#fff;
+    border:2px solid #d5dce6;
+    border-radius:6px;
+    padding:7px 12px;
+    min-width:100px;
+    cursor:pointer;
+    outline:none;
+    transition:border-color .2s ease,box-shadow .2s ease;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230066FF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    background-size:14px;
+    padding-right:32px;
+}
+
+.acapulco-age-select:hover{border-color:#0066FF}
+
+.acapulco-age-select:focus{
+    border-color:#0066FF;
+    box-shadow:0 0 0 3px rgba(0,102,255,.15);
+}
+
+.acapulco-age-select.acapulco-age-error{
+    border-color:#e53935;
+    box-shadow:0 0 0 3px rgba(229,57,53,.15);
+}
+
+.acapulco-age-note{
+    display:none;
+    margin-top:12px;
+    padding:10px 12px;
+    background:#e8f1ff;
+    border-left:3px solid #0066FF;
+    border-radius:4px;
+    font-size:12.5px;
+    line-height:1.5;
+    color:#0052CC;
+    font-weight:600;
+}
+
+.acapulco-guest-done-wrap{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:14px;
+}
+
+.acapulco-guest-done{
+    background:#0066FF;
+    color:#fff;
+    border:none;
+    border-radius:20px;
+    padding:9px 26px;
+    font-family:'Open Sans',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:background .2s ease,transform .2s ease;
+}
+
+.acapulco-guest-done:hover{background:#0052CC;transform:translateY(-1px)}
+.acapulco-guest-done:active{transform:translateY(0)}
+
+/* ===== LOADING / ANIMATION ===== */
 .acapulco-loading{
     display:inline-block;
-    width:14px;
-    height:14px;
+    width:14px;height:14px;
     border:2px solid rgba(255,255,255,.3);
     border-radius:50%;
     border-top-color:#fff;
@@ -295,161 +333,68 @@
     margin-left:8px;
 }
 
-@keyframes spinLoader{
-    to{transform:rotate(360deg)}
-}
+@keyframes spinLoader{to{transform:rotate(360deg)}}
 
 @keyframes pulseBtn{
     0%,100%{box-shadow:0 4px 15px rgba(0,102,255,.25)}
     50%{box-shadow:0 6px 25px rgba(0,102,255,.45)}
 }
 
-.acapulco-book-now-btn.pulse{
-    animation:pulseBtn 2s ease-in-out infinite;
-}
+.acapulco-book-now-btn.pulse{animation:pulseBtn 2s ease-in-out infinite}
 
-/* FLATPICKR CALENDAR STYLING - Blue theme */
+/* ===== FLATPICKR ===== */
 .flatpickr-calendar{
     font-family:'Open Sans',sans-serif!important;
     box-shadow:0 10px 40px rgba(0,0,0,.15)!important;
     border:none!important;
 }
 
-.flatpickr-day.selected{
-    background:#0066FF!important;  /* Mavi */
-    border-color:#0066FF!important;
-}
-
-.flatpickr-day.selected:hover{
-    background:#0052CC!important;
-    border-color:#0052CC!important;
-}
-
-.flatpickr-months .flatpickr-month{
-    background:#0066FF!important;  /* Mavi */
-}
-
-.flatpickr-current-month .flatpickr-monthDropdown-months{
-    background:#0066FF!important;
-    color:#fff!important;
-}
-
-.flatpickr-current-month{
-    color:#fff!important;
-}
-
-.flatpickr-current-month .flatpickr-monthDropdown-months{
-    color:#fff!important;
-}
-
-.flatpickr-current-month .numInputWrapper input{
-    color:#fff!important;
-}
-
+.flatpickr-day.selected{background:#0066FF!important;border-color:#0066FF!important}
+.flatpickr-day.selected:hover{background:#0052CC!important;border-color:#0052CC!important}
+.flatpickr-months .flatpickr-month{background:#0066FF!important}
+.flatpickr-current-month .flatpickr-monthDropdown-months{background:#0066FF!important;color:#fff!important}
+.flatpickr-current-month{color:#fff!important}
+.flatpickr-current-month .numInputWrapper input{color:#fff!important}
 .flatpickr-months .flatpickr-prev-month svg,
-.flatpickr-months .flatpickr-next-month svg{
-    fill:#fff!important;
-}
+.flatpickr-months .flatpickr-next-month svg{fill:#fff!important}
+.flatpickr-current-month span.cur-month{color:#fff!important}
 
-.flatpickr-current-month span.cur-month{
-    color:#fff!important;
-}
-
-/* RESPONSIVE BREAKPOINTS */
-
-/* Tablet and below (992px and down) */
+/* ===== RESPONSIVE ===== */
 @media (max-width:992px){
-    .acapulco-widget-horizontal{
-        max-width:100%;
-        width:95%;
-        padding:18px 20px;
-    }
-    
-    .acapulco-form-horizontal{
-        flex-wrap:wrap;
-        gap:10px;
-    }
-    
+    .acapulco-widget-horizontal{max-width:100%;width:95%;padding:18px 20px}
+    .acapulco-form-horizontal{flex-wrap:wrap;gap:10px}
     .acapulco-field-horizontal{
         flex:1 1 calc(33.33% - 7px);
         border-right:none;
         border-bottom:1px solid #e8e8e8;
         min-width:140px;
     }
-    
-    .acapulco-field-horizontal:nth-last-child(2){
-        border-bottom:none;
-    }
-    
-    .acapulco-button-container{
-        flex:1 1 100%;
-        width:100%;
-        padding:10px 0 0 0;
-    }
-    
-    .acapulco-book-now-btn{
-        width:100%;
-        padding:14px 30px;
-    }
-    
-    .acapulco-field-label{
-        font-size:11px;
-    }
-    
-    .acapulco-field-content{
-        font-size:14px;
-    }
+    .acapulco-field-horizontal:nth-last-child(2){border-bottom:none}
+    .acapulco-button-container{flex:1 1 100%;width:100%;padding:10px 0 0 0}
+    .acapulco-book-now-btn{width:100%;padding:14px 30px}
+    .acapulco-field-label{font-size:11px}
+    .acapulco-field-content{font-size:14px}
 }
 
-/* Mobile (576px and down) */
 @media (max-width:576px){
-    .acapulco-widget-horizontal{
-        padding:15px;
-        width:98%;
-        margin:10px auto;
-    }
-    
-    .acapulco-field-horizontal{
-        flex:1 1 100%;
-        padding:12px 15px;
-        border-bottom:1px solid #e8e8e8;
-    }
-    
-    .acapulco-field-horizontal:nth-last-child(2){
-        border-bottom:1px solid #e8e8e8;
-    }
-    
-    .acapulco-field-label{
-        font-size:11px;
-    }
-    
-    .acapulco-field-content{
-        font-size:13px;
-    }
-    
-    .acapulco-book-now-btn{
-        padding:12px 25px;
-        font-size:14px;
-    }
-    
+    .acapulco-widget-horizontal{padding:15px;width:98%;margin:10px auto}
+    .acapulco-field-horizontal{flex:1 1 100%;padding:12px 15px;border-bottom:1px solid #e8e8e8}
+    .acapulco-field-horizontal:nth-last-child(2){border-bottom:1px solid #e8e8e8}
+    .acapulco-field-label{font-size:11px}
+    .acapulco-field-content{font-size:13px}
+    .acapulco-book-now-btn{padding:12px 25px;font-size:14px}
     .acapulco-guest-dropdown{
         left:0;
         transform:translateX(0) translateY(-10px);
-        min-width:280px;
+        min-width:auto;
+        width:100%;
+        max-height:340px;
     }
-    
-    .acapulco-guest-dropdown.active{
-        transform:translateX(0) translateY(0);
-    }
-    
-    .acapulco-guest-dropdown::before{
-        left:20%;
-    }
+    .acapulco-guest-dropdown.active{transform:translateX(0) translateY(0)}
+    .acapulco-guest-dropdown::before{left:20%}
+    .acapulco-age-select{min-width:90px;font-size:13px}
 }
 
-/* Large screens - Expedia-style narrow */
 @media (min-width:1400px){
-    .acapulco-widget-horizontal{
-        max-width:950px;  /* Expedia tarzı */
-    }
+    .acapulco-widget-horizontal{max-width:950px}
 }
