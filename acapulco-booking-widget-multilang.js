@@ -1,6 +1,6 @@
 /* ACAPULCO BOOKING WIDGET - MULTI-LANGUAGE VERSION */
 /* Supports: English, Turkish, German, Russian */
-/* Version 3.0.0 - Child Age Selection (0-11) */
+/* Version 3.1.0 - Child Age Selection (0-11), singular TR labels */
 
 (function() {
     'use strict';
@@ -25,7 +25,6 @@
             child: 'Child',
             age: 'Age',
             selectAge: 'Select',
-            ageNote: 'Children aged 0-6 stay free of charge.',
             done: 'Done',
             flatpickrLocale: null
         },
@@ -34,9 +33,9 @@
             checkOut: 'Çıkış',
             guest: 'Misafir',
             guests: 'Misafirler',
-            rooms: 'Odalar',
-            adults: 'Yetişkinler',
-            children: 'Çocuklar',
+            rooms: 'Oda',
+            adults: 'Yetişkin',
+            children: 'Çocuk',
             bookNow: 'Rezervasyon Yap',
             loading: 'Yükleniyor...',
             selectDate: 'Tarih seçin',
@@ -45,7 +44,6 @@
             child: 'Çocuk',
             age: 'Yaş',
             selectAge: 'Seç',
-            ageNote: '0-6 yaş arası çocuklar ücretsiz konaklar.',
             done: 'Tamam',
             flatpickrLocale: 'tr'
         },
@@ -65,7 +63,6 @@
             child: 'Kind',
             age: 'Alter',
             selectAge: 'Wählen',
-            ageNote: 'Kinder von 0-6 Jahren übernachten kostenlos.',
             done: 'Fertig',
             flatpickrLocale: 'de'
         },
@@ -85,7 +82,6 @@
             child: 'Ребенок',
             age: 'Возраст',
             selectAge: 'Выбрать',
-            ageNote: 'Дети от 0 до 6 лет проживают бесплатно.',
             done: 'Готово',
             flatpickrLocale: 'ru'
         }
@@ -197,7 +193,6 @@
                     '</div>' +
                 '</div>' +
                 '<div class="acapulco-child-ages" id="childAgesContainer"></div>' +
-                '<div class="acapulco-age-note" id="childAgeNote">' + t.ageNote + '</div>' +
                 '<div class="acapulco-guest-done-wrap">' +
                     '<button type="button" class="acapulco-guest-done" id="guestDoneBtn">' + t.done + '</button>' +
                 '</div>' +
@@ -448,16 +443,12 @@
 
     function renderChildAges() {
         var wrap = document.getElementById('childAgesContainer');
-        var note = document.getElementById('childAgeNote');
         if (!wrap) return;
 
         if (widgetState.children === 0) {
             wrap.innerHTML = '';
-            if (note) note.style.display = 'none';
             return;
         }
-
-        if (note) note.style.display = 'block';
 
         var html = '';
         for (var i = 0; i < widgetState.children; i++) {
