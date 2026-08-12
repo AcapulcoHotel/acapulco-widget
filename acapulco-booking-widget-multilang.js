@@ -1,6 +1,6 @@
 /* ACAPULCO BOOKING WIDGET - MULTI-LANGUAGE VERSION */
 /* Supports: English, Turkish, German, Russian */
-/* Version 3.1.0 - Child Age Selection (0-11), singular TR labels */
+/* Version 3.2.0 - No Done button, auto-apply selections */
 
 (function() {
     'use strict';
@@ -25,7 +25,6 @@
             child: 'Child',
             age: 'Age',
             selectAge: 'Select',
-            done: 'Done',
             flatpickrLocale: null
         },
         tr: {
@@ -44,7 +43,6 @@
             child: 'Çocuk',
             age: 'Yaş',
             selectAge: 'Seç',
-            done: 'Tamam',
             flatpickrLocale: 'tr'
         },
         de: {
@@ -63,7 +61,6 @@
             child: 'Kind',
             age: 'Alter',
             selectAge: 'Wählen',
-            done: 'Fertig',
             flatpickrLocale: 'de'
         },
         ru: {
@@ -82,7 +79,6 @@
             child: 'Ребенок',
             age: 'Возраст',
             selectAge: 'Выбрать',
-            done: 'Готово',
             flatpickrLocale: 'ru'
         }
     };
@@ -193,9 +189,6 @@
                     '</div>' +
                 '</div>' +
                 '<div class="acapulco-child-ages" id="childAgesContainer"></div>' +
-                '<div class="acapulco-guest-done-wrap">' +
-                    '<button type="button" class="acapulco-guest-done" id="guestDoneBtn">' + t.done + '</button>' +
-                '</div>' +
             '</div>' +
         '</div>' +
         '<div class="acapulco-button-container">' +
@@ -353,7 +346,6 @@
     function setupGuestSelector() {
         var dropdown = document.getElementById('guestDropdownPanel');
         var guestField = document.getElementById('guestField');
-        var doneBtn = document.getElementById('guestDoneBtn');
 
         if (!dropdown || !guestField) return;
 
@@ -366,14 +358,6 @@
         dropdown.addEventListener('click', function(e) {
             e.stopPropagation();
         });
-
-        if (doneBtn) {
-            doneBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropdown.classList.remove('active');
-            });
-        }
 
         document.addEventListener('click', function(e) {
             if (!guestField.contains(e.target)) {
